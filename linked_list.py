@@ -2,9 +2,13 @@
 
 
 class Node:
+    @staticmethod
+    def is_node(data):
+        return isinstance(data, Node)
+
     def __init__(self, data):
         # !!
-        if isinstance(data, Node):
+        if Node.is_node(data):
             self.data = data.data
         else:
             self.data = data
@@ -15,10 +19,6 @@ class Node:
 
     def __str__(self):
         return f'(id: 0x{id(self):X}, {self.data}, {type(self.data)})'
-
-    @staticmethod
-    def is_node(data):
-        return isinstance(data, Node)
 
     def __eq__(a, b):
         if not Node.is_node(b):
@@ -55,15 +55,8 @@ class LinkedList:
             n += 1
         return n
 
-    @staticmethod
-    def to_node(data):
-        if not isinstance(data, Node):
-            return Node(data)
-        else:
-            return data
-
     def append(self, data):
-        data = self.to_node(data)
+        data = Node(data)
         if self.head is None:
             self.head = data
             return
@@ -74,7 +67,7 @@ class LinkedList:
         return
 
     def append_left(self, data):
-        data = self.to_node(data)
+        data = Node(data)
         data.next = self.head
         self.head = data
         return
@@ -85,59 +78,90 @@ class LinkedList:
         return
 
     def insert_after(self, old, new):
-        old = self.to_node(old)
-        new = self.to_node(new)
+        old = Node(old)
+        new = Node(new)
         if len(self) == 0:
             raise ValueError('Empty linked list.')
         for node in self:
-            if node == old:
+            if node.data == old.data:
                 new.next = node.next
                 node.next = new
                 return
         node.next = new
 
     def insert_before(self, old, new):
-        old = self.to_node(old)
-        new = self.to_node(new)
+        old = Node(old)
+        new = Node(new)
         if len(self) == 0:
             raise ValueError('Empty linked list.')
         previous = self.head
-        if previous == old:
+        if previous.data == old.data:
             self.append_left(new)
             return
         for node in self:
-            if node == old:
+            if node.data == old.data:
                 previous.next = new
                 new.next = node
                 return
             previous = node
         raise ValueError(f'{old} not found in linked list.')
 
+    def remove(self, data):
+        if len(self) == 0:
+            raise ValueError('Empty linked list.')
+        if self.head.data == data:
+            self.head = self.head.next
+            return
+        previous = self.head
+        for node in self:
+            if node.data == data:
+                previous.next = node.next
+                return
+            previous = node
+        raise ValueError(f'{data} not found in linked list.')
 
-a = Node(1)
-x = Node(a)
-print('x', x, x.data,)
-print(a==Node(1), a>Node(3), a<Node(10))
-aa = LinkedList()
-print(aa, len(aa))
-b = LinkedList(a)
-print(b)
-b.append(Node(3))
-print(b)
-b.append(Node(5))
-print(b)
-b.extend('test')
-print(b)
-print('length', len(b))
-b.append_left(999)
-print(b)
-b.insert_after('e', 'insert')
-print(b)
-b.insert_after('notfound', 'insert_to_end')
-print(b)
-b.insert_before(999, 'before')
-print(b)
-b.insert_before('e', 'e-before')
-print(b)
-b.insert_before(1000, 'insertbefore')
-print(b)
+    def reverse(self):
+        stack = []
+        new = LinkedList()
+        for node in self:
+            stack.append(node)
+        while stack:
+            node = stack.pop()
+            new.append(node)
+        return new
+
+
+def test():
+    a = Node(1)
+    x = Node(a)
+    print('a', a, 'x', x)
+    print(a==Node(1), a>Node(3), a<Node(10))
+    aa = LinkedList()
+    print(aa, len(aa))
+    b = LinkedList(a)
+    print(b)
+    b.append(Node(3))
+    print(b)
+    b.append(Node(5))
+    print(b)
+    b.extend('test')
+    print(b)
+    print('length', len(b))
+    b.append_left(999)
+    print(b)
+    b.insert_after('e', 'insert')
+    print(b)
+    b.insert_after('notfound', 'insert_to_end')
+    print(b)
+    b.insert_before(999, 'before')
+    print(b)
+    b.insert_before('e', 'e-before')
+    print(b)
+    b.remove(999)
+    print(b)
+    b.remove('e')
+    print(b)
+    print(b.reverse())
+
+
+test()
