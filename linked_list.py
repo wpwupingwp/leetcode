@@ -2,10 +2,6 @@
 
 
 class Node:
-    @staticmethod
-    def is_node(data):
-        return isinstance(data, Node)
-
     def __init__(self, data):
         # !!
         if Node.is_node(data):
@@ -30,6 +26,10 @@ class Node:
             raise TypeError(f'{b} is not a Node')
         return (a.data > b.data)
 
+    @staticmethod
+    def is_node(data: object):
+        return isinstance(data, Node)
+
 
 class LinkedList:
     def __init__(self, head=None):
@@ -51,19 +51,26 @@ class LinkedList:
 
     def __len__(self):
         n = 0
-        for node in self:
+        for _ in self:
             n += 1
         return n
+
+    def find(self, data):
+        data = Node(data)
+        for n, _ in enumerate(self):
+            if _.data == data.data:
+                return n
+        return -1
 
     def append(self, data):
         data = Node(data)
         if self.head is None:
             self.head = data
-            return
-        for node in self:
-            if node.next is None:
-                node.next = data
-                break
+        else:
+            for node in self:
+                if node.next is None:
+                    node.next = data
+                    break
         return
 
     def append_left(self, data):
@@ -73,6 +80,7 @@ class LinkedList:
         return
 
     def extend(self, data):
+        # data: iterable
         for d in data:
             self.append(d)
         return
@@ -87,7 +95,9 @@ class LinkedList:
                 new.next = node.next
                 node.next = new
                 return
+        # if last one
         node.next = new
+        return
 
     def insert_before(self, old, new):
         old = Node(old)
@@ -129,6 +139,35 @@ class LinkedList:
             node = stack.pop()
             new.append(node)
         return new
+
+
+class CircularLinkedList(LinkedList):
+    def __iter__(self):
+        if self.head is None:
+            return None
+        current = self.head
+        yield current
+        current = current.next
+        while current is not self.head:
+            yield current
+            current = current.next
+
+    def traverse(self, head=None):
+        # iter from head to head after a circle
+        if head is None:
+            head = self.head
+        if self.find(head) == -1:
+            raise ValueError('Value not found.')
+        # goto head
+        for node in self:
+            if node.data != head.data:
+                pass
+            else:
+                old_head = self.head
+                self.head = node
+                break
+        yield from self.__iter__()
+        self.head = old_head
 
 
 def test():
